@@ -32,7 +32,7 @@ struct InitVMAction {
     // TODO: Parameter here
     conn: Connect,
     // initvm
-    // conn
+    // node
 }
 
 impl InitVMAction {
