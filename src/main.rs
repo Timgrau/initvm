@@ -1,5 +1,6 @@
 use clap::Parser;
 use virt::connect::Connect;
+use virt::domain::Domain;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, arg_required_else_help = true)]
@@ -29,22 +30,28 @@ struct InitVMArgs {
 }
 
 struct InitVMAction {
-    // TODO: Parameter here
     conn: Connect,
-    // initvm
-    // node
+    domain: Domain,
+    // TODO: node
 }
 
 impl InitVMAction {
     fn new(/* node, initvmneeded */) -> Self {
         // TODO: Check if soap is local
-        let conn = match Connect::open("qemu:///system") {
+        let mut conn = match Connect::open("qemu:///system") {
             Ok(conn) => conn,
             Err(e) => panic!("No conenction to hypervisor: {}", e),
         };
+        // TODO: Normally error messages and reconnection here 
+        let domain = match Domain::lookup_by_name(&conn, "initvm") {
+            Ok(domain) => domain,
+            Err(e) => {
+                let _ = conn.close();
+                panic!("Domain cannot be found {}", e)
+            },
+        };
 
-        println!("{:?}", conn); 
-        Self { conn, /* initvm, conn */ }
+        Self { conn, domain /*, node */ }
     }
 }
 
@@ -55,6 +62,7 @@ fn main() {
 
     println!("{:?}", action.conn);
     assert_eq!(Ok(0), action.conn.close());
+    //println!("{:?}", action.domain);
 
 
     if args.create {
@@ -62,10 +70,14 @@ fn main() {
     }
 
     if args.start {
-        println!("start")
+        initvm_start();
     }
 }
 
 fn initvm_create() {
     println!("create-function")
+}
+
+fn initvm_start() {
+    println!("start-function")
 }
