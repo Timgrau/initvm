@@ -1,7 +1,7 @@
 Rebuild-initvm
 ==============
 Before you can build the project with `cargo build`,
-make sure you installed `libvirt-dev` and `libvirt-devel`.
+make sure you installed `libvirt-dev` and `libvirt`.
 
 Before you can run the project with `cargo run`,
 make sure your user is part of the libvirt group

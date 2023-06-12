@@ -42,13 +42,7 @@ impl InitVMAction {
             Ok(conn) => conn,
             Err(e) => panic!("No conenction to hypervisor: {}", e),
         };
-        let d = match conn.list_all_domains(1 | 2) {
-            Ok(d) => d,
-            Err(e) => panic!("Error {}", e),
-        };
-            
-        println!("{:?}", d[0].as_ptr().is_null());
-        
+
         // TODO: Normally error messages and reconnection here 
         let domain = match Domain::lookup_by_name(&conn, "initvm") {
             Ok(domain) => domain,
@@ -73,7 +67,7 @@ fn main() {
 
 
     if args.create {
-        initvm_create(action.domain);
+        initvm_create(action.domain, action.conn);
     }
 
     if args.start {
@@ -81,14 +75,17 @@ fn main() {
     }
 }
 
-fn initvm_create(domain: Domain) {
-    if !domain.as_ptr().is_null() {
-        print!("Domain {:?}:{:?} already found!", domain.get_hostname(1 | 2), domain.get_id());
+fn initvm_create(domain: Domain, conn: Connect) {
+    if domain.get_name().unwrap() == "initvm" {
+        println!("Domain '{:?}' already found!", domain.get_name());
+        println!("If you want to remove your old initvm from libvirt \
+                  run `virsh --connect qemu:///system undefine {}`", 
+                  domain.get_name().unwrap());
     }
 
-    println!("create-function")
+    println!("create-function");
 }
 
 fn initvm_start() {
-    println!("start-function")
+    println!("start-function");
 }
