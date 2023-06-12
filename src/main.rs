@@ -42,6 +42,13 @@ impl InitVMAction {
             Ok(conn) => conn,
             Err(e) => panic!("No conenction to hypervisor: {}", e),
         };
+        let d = match conn.list_all_domains(1 | 2) {
+            Ok(d) => d,
+            Err(e) => panic!("Error {}", e),
+        };
+            
+        println!("{:?}", d[0].as_ptr().is_null());
+        
         // TODO: Normally error messages and reconnection here 
         let domain = match Domain::lookup_by_name(&conn, "initvm") {
             Ok(domain) => domain,
@@ -66,7 +73,7 @@ fn main() {
 
 
     if args.create {
-        initvm_create();
+        initvm_create(action.domain);
     }
 
     if args.start {
@@ -74,7 +81,11 @@ fn main() {
     }
 }
 
-fn initvm_create() {
+fn initvm_create(domain: Domain) {
+    if !domain.as_ptr().is_null() {
+        print!("Domain {:?}:{:?} already found!", domain.get_hostname(1 | 2), domain.get_id());
+    }
+
     println!("create-function")
 }
 

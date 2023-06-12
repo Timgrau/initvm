@@ -1,0 +1,12 @@
+Rebuild-initvm
+==============
+Before you can build the project with `cargo build`,
+make sure you installed `libvirt-dev` and `libvirt-devel`.
+
+Before you can run the project with `cargo run`,
+make sure your user is part of the libvirt group
+`sudo usermod -a -G libvirt <username>`.
+
+On fedora:
+==========
+`sudo dnf install libvirt, libvirt-devel && cargo build`
