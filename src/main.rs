@@ -1,32 +1,54 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use virt::connect::Connect;
 use virt::domain::Domain;
+use std::path::PathBuf;
 
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 #[command(author, version, about, arg_required_else_help = true)]
 #[group(multiple = false)]
-struct InitVMArgs {
-    /// Attach to the initvm console which is accessed via virsh
-    #[arg(long)]
-    attach: bool,
+struct InitVMCli {
+    #[command(subcommand)]
+    command: InitVMCommands,
+}
+
+#[derive(Subcommand)]
+enum InitVMCommands {
     /// Triggers a complete build of the elbe XML file
-    #[arg(long)]
-    create: bool,
+    #[command(author, version, about)]
+    Create { 
+        #[arg(long, short)]
+        file: Option<PathBuf>,
+    },
+    /// Attach to the initvm console which is accessed via virsh
+    #[command(author, version, about)]
+    Attach {
+        // TODO
+    },
     /// Make sure an initvm is running in the background    
-    #[arg(long)]
-    ensure: bool,
+    #[command(author, version, about)]
+    Ensure {
+        // TODO
+    },
     /// Start initvm in the background
-    #[arg(long)]
-    start: bool,
+    #[command(author, version, about)]
+    Start {
+        // TODO
+    },
     /// Shutdown the running initvm
-    #[arg(long)]
-    stop: bool, 
+    #[command(author, version, about)]
+    Stop {
+        // TODO
+    },
     /// Triggers a complete rebuild of an existing elbe XML file  
-    #[arg(long)]
-    submit: bool, 
+    #[command(author, version, about)]
+    Submit {
+        // TODO
+    },
     /// Upload elbe version from the current working into initvm using rsync
-    #[arg(long)]
-    sync : bool,
+    #[command(author, version, about)]
+    Sync  {
+        // TODO
+    },
 }
 
 struct InitVMAction {
@@ -42,7 +64,7 @@ impl InitVMAction {
             Ok(conn) => conn,
             Err(e) => panic!("No conenction to hypervisor: {}", e),
         };
-
+        	
         // TODO: Normally error messages and reconnection here 
         let domain = match Domain::lookup_by_name(&conn, "initvm") {
             Ok(domain) => domain,
@@ -58,32 +80,48 @@ impl InitVMAction {
 
 // TODO: `create` and `recreate` could be redundant, lets see...
 fn main() {
-    let args = InitVMArgs::parse();
+    let cli = InitVMCli::parse();
     let mut action = InitVMAction::new();
 
-    println!("{:?}", action.conn);
-    assert_eq!(Ok(0), action.conn.close());
-    //println!("{:?}", action.domain);
+    match &cli.command {
+        InitVMCommands::Create{ file } => {
+            initvm_create(action.domain, file);
+        }
+        InitVMCommands::Attach{ } => {
 
+        }
+        InitVMCommands::Ensure{ } => {
 
-    if args.create {
-        initvm_create(action.domain, action.conn);
-    }
+        }
+        InitVMCommands::Start{ } => {
+            initvm_start();
+        }
+        InitVMCommands::Stop{ } => {
 
-    if args.start {
-        initvm_start();
+        }
+        InitVMCommands::Submit{ } => {
+
+        }
+        InitVMCommands::Sync{ } => {
+
+        }
+
     }
 }
 
-fn initvm_create(domain: Domain, conn: Connect) {
+fn initvm_create(domain: Domain, file: &Option<PathBuf>) {
     if domain.get_name().unwrap() == "initvm" {
-        println!("Domain '{:?}' already found!", domain.get_name());
+        println!("Domain `{}` already found!", domain.get_name().unwrap());
         println!("If you want to remove your old initvm from libvirt \
                   run `virsh --connect qemu:///system undefine {}`", 
                   domain.get_name().unwrap());
     }
-
-    println!("create-function");
+    if file.is_none() { 
+        // Use default elbe-init-with-ssh
+    } else {
+        // Use given xml file here     
+        println!("{:?}", file);
+    }
 }
 
 fn initvm_start() {
